@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>כיסאות מוזיקליים פוליטיים</title>
+<title>מי יהיה ראש הממשלה?</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Secular+One&family=Heebo:wght@400;700;900&display=swap');
 
@@ -222,9 +222,9 @@
 
 <!-- LOBBY -->
 <div id="lobbyScreen" class="lobby-screen">
-  <div style="font-size:2.5rem;margin-bottom:8px">🪑</div>
-  <h1>כיסאות מוזיקליים פוליטיים</h1>
-  <div class="lobby-sub">בחר מצב משחק</div>
+  <div style="font-size:2.5rem;margin-bottom:8px">🏛️</div>
+  <h1>מי יהיה ראש הממשלה?</h1>
+  <div class="lobby-sub">נחש מי יישאר בלי כסא</div>
 
   <input type="text" id="myName" style="display:none">
 
@@ -671,12 +671,17 @@ function handleGameover() {
     { name: gameState.guest, score: gameState.scores?.guest || 0 },
   ].sort((a,b) => b.score - a.score);
   const medals = ['🥇','🥈'];
+  const guesserWinner = sorted[0].score > sorted[1].score ? sorted[0].name : null;
+  const guesserLine = guesserWinner
+    ? `<div style="color:var(--gold);font-size:1.1rem;font-weight:900;margin-bottom:12px">🎯 המנחש הטוב ביותר: ${guesserWinner}!</div>`
+    : `<div style="color:var(--gold);font-size:1rem;margin-bottom:12px">🤝 תיקו בין המנחשים!</div>`;
   document.getElementById('finalScores').innerHTML = `
     <h3 style="color:var(--gold);margin-bottom:12px">תוצאות המשחק</h3>
+    ${guesserLine}
     ${sorted.map((p,i) => `
       <div class="final-score-row">
         <span>${medals[i]} ${p.name}</span>
-        <span style="color:var(--gold);font-weight:700">${p.score} נקודות</span>
+        <span style="color:var(--gold);font-weight:700">${p.score} ניחושים נכונים</span>
       </div>
     `).join('')}
   `;
@@ -1071,12 +1076,17 @@ function showSoloWinner() {
   document.getElementById('winnerName').textContent = winner.name;
   const sorted = [...soloPlayers].sort((a,b) => b.score - a.score);
   const medals = ['🥇','🥈','🥉'];
+  const guesserWinner = sorted[0].score > sorted[1].score ? sorted[0].name : sorted[0].score === sorted[1].score ? null : sorted[1].name;
+  const guesserLine = guesserWinner
+    ? `<div style="color:var(--gold);font-size:1.1rem;font-weight:900;margin-bottom:12px">🎯 המנחש הטוב ביותר: ${guesserWinner}!</div>`
+    : `<div style="color:var(--gold);font-size:1rem;margin-bottom:12px">🤝 תיקו בין המנחשים!</div>`;
   document.getElementById('finalScores').innerHTML = `
     <h3 style="color:var(--gold);margin-bottom:12px">תוצאות המשחק</h3>
+    ${guesserLine}
     ${sorted.map((p,i) => `
       <div class="final-score-row">
         <span>${medals[i]||''} ${p.name}</span>
-        <span style="color:var(--gold);font-weight:700">${p.score} נקודות</span>
+        <span style="color:var(--gold);font-weight:700">${p.score} ניחושים נכונים</span>
       </div>
     `).join('')}
   `;
