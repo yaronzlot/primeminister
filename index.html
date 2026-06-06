@@ -592,8 +592,11 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
+let audioUnlocked = false;
+
 function userStartMusic() {
   document.getElementById('playMusicBtn').style.display = 'none';
+  audioUnlocked = true;
   playMusic();
   document.getElementById('trumpImg').classList.add('playing');
   document.querySelectorAll('.pol-card').forEach(c => c.classList.add('moving'));
@@ -635,10 +638,14 @@ function startRound() {
   renderChairs();
   renderPoliticians(false);
 
-  // Show play button — music requires user interaction on mobile
-  document.getElementById('playMusicBtn').style.display = 'block';
-  document.getElementById('statusMsg').textContent = 'לחץ על הכפתור להפעלת המוזיקה 🎵';
-  document.getElementById('trumpImg').classList.remove('playing');
+  // Show play button only on first round, auto-play after
+  if (audioUnlocked) {
+    userStartMusic();
+  } else {
+    document.getElementById('playMusicBtn').style.display = 'block';
+    document.getElementById('statusMsg').textContent = 'לחץ על הכפתור להפעלת המוזיקה 🎵';
+    document.getElementById('trumpImg').classList.remove('playing');
+  }
 }
 
 function stopMusic() {
@@ -849,6 +856,7 @@ function showWinner() {
 function playAgain() {
   stopAudio();
   clearConfetti();
+  audioUnlocked = false;
   showScreen('setupScreen');
 }
 
