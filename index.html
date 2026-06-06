@@ -854,13 +854,11 @@ function playAgain() {
 
 // ===== AUDIO =====
 const AUDIO_BASE = 'https://yaronzlot.github.io/primeminister/audio/';
-const audio = new Audio();
+const audio = new Audio(AUDIO_BASE + 'BetteDavisEyes.mp3');
 audio.loop = true;
+audio.volume = 0.6;
 
 function playMusic() {
-  audio.src = AUDIO_BASE + 'BetteDavisEyes.mp3';
-  audio.loop = true;
-  audio.volume = 0.6;
   audio.play().catch(e => console.log('audio error:', e));
 }
 
@@ -870,12 +868,12 @@ function pauseAudio() {
 
 function stopAudio() {
   audio.pause();
-  audio.src = '';
+  audio.currentTime = 0;
 }
 
 function playWinMusic() {
   audio.pause();
-  audio.src = AUDIO_BASE + 'BetteDavisEyes.mp3';
+  audio.currentTime = 0;
   audio.loop = false;
   audio.volume = 0.8;
   audio.play().catch(e => {});
