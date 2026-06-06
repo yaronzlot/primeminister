@@ -154,16 +154,17 @@
   }
   .guess-section h3 { color: var(--gold); text-align: center; margin-bottom: 12px; font-size: 1rem; }
   .guess-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px;
-    margin-bottom: 10px;
+    display: flex; flex-wrap: nowrap; gap: 6px; justify-content: center;
+    margin-bottom: 10px; overflow-x: auto;
   }
   .guess-btn {
     background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
-    border-radius: 12px; padding: 8px 4px; cursor: pointer; color: white;
-    font-family: 'Heebo', sans-serif; font-size: 0.75rem; text-align: center;
+    border-radius: 12px; padding: 6px 4px; cursor: pointer; color: white;
+    font-family: 'Heebo', sans-serif; font-size: 0.7rem; text-align: center;
     transition: border-color 0.15s, background 0.15s;
+    flex: 0 0 auto; width: 72px;
   }
-  .guess-btn img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 4px; }
+  .guess-btn img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 4px; }
   .guess-btn.selected { border-color: var(--gold); background: rgba(255,215,0,0.15); }
   .confirm-guess-btn {
     width: 100%; padding: 12px; border-radius: 14px; border: none;
@@ -848,7 +849,7 @@ window.createRoom = async function() {
 window.startSolo = function() {
   myName = document.getElementById('myName').value.trim() || 'שחקן 1';
   isSolo = true;
-  soloPlayers = [{ name: myName, score: 0 }, { name: '🤖 מחשב', score: 0, isAI: true }];
+  soloPlayers = [{ name: 'אתה', score: 0 }, { name: '🤖 מחשב', score: 0, isAI: true }];
   soloRemaining = [...POLITICIANS];
   soloEliminated = [];
   soloRound = 0;
@@ -1023,6 +1024,9 @@ function showSoloRoundResult() {
     soloRemaining = soloRemaining.filter(p => p.id !== soloLoser.id);
     nextBtn.textContent = 'סיבוב הבא ▶';
   } else {
+    // Pick a different loser next time
+    const others = soloRemaining.filter(p => p.id !== soloLoser.id);
+    if (others.length > 0) soloLoser = others[Math.floor(Math.random() * others.length)];
     nextBtn.textContent = '🔄 סיבוב חוזר!';
   }
 
