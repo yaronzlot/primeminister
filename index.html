@@ -18,583 +18,673 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: var(--dark);
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a0a00 0%, #2d1500 50%, #1a0020 100%);
     color: var(--light);
     font-family: 'Heebo', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-image: 
-      radial-gradient(ellipse at 20% 50%, #1a0a00 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 50%, #00001a 0%, transparent 60%);
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
   }
 
-  h1 {
-    font-family: 'Secular One', sans-serif;
+  /* ── LOBBY / WAITING SCREENS ── */
+  .lobby-screen {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 24px;
+    padding: 32px 24px;
+    max-width: 360px; width: 100%;
     text-align: center;
-    font-size: clamp(1.4rem, 5vw, 2.5rem);
-    color: var(--gold);
-    text-shadow: 0 0 20px rgba(255,215,0,0.5);
-    padding: 16px;
-    letter-spacing: 2px;
+    margin-top: 40px;
+  }
+  .lobby-screen h1 { font-family: 'Secular One', sans-serif; font-size: 1.4rem; color: var(--gold); margin-bottom: 6px; }
+  .lobby-sub { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 28px; }
+
+  .lobby-btn {
+    width: 100%; padding: 15px; border-radius: 18px; border: none;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    font-family: 'Heebo', sans-serif; margin-bottom: 12px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .lobby-btn:hover { transform: translateY(-2px); }
+  .btn-invite { background: linear-gradient(135deg, var(--gold), #e6a800); color: #000; box-shadow: 0 4px 16px rgba(255,215,0,0.3); }
+  .btn-solo { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+
+  .name-input {
+    width: 100%; padding: 13px 16px; border-radius: 14px;
+    border: 2px solid rgba(255,215,0,0.3); background: rgba(255,255,255,0.08);
+    color: white; font-size: 1rem; font-family: 'Heebo', sans-serif;
+    outline: none; margin-bottom: 16px; text-align: center;
+  }
+  .name-input:focus { border-color: var(--gold); }
+  .name-input::placeholder { color: rgba(255,255,255,0.35); }
+
+  .lobby-err { color: #ff6b6b; font-size: 0.85rem; min-height: 20px; margin-top: 8px; }
+
+  /* WAITING */
+  .waiting-box { text-align: center; }
+  .waiting-box h2 { color: var(--gold); margin-bottom: 12px; }
+  .waiting-hint { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 8px; }
+  .spinner {
+    width: 40px; height: 40px; border: 4px solid rgba(255,215,0,0.2);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin 1s linear infinite; margin: 20px auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .cancel-btn {
+    background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
+    padding: 10px 24px; border-radius: 14px; cursor: pointer; font-family: 'Heebo', sans-serif;
+    font-size: 0.9rem; margin-top: 16px;
   }
 
-  /* ===== SCREENS ===== */
-  .screen { display: none; padding: 12px; max-width: 480px; margin: 0 auto; }
+  /* ── GAME SCREENS ── */
+  .screen { display: none; width: 100%; max-width: 480px; }
   .screen.active { display: block; }
 
-  /* ===== SETUP SCREEN ===== */
-  .trump-host {
-    text-align: center;
-    margin: 8px 0 16px;
-  }
-  .trump-host img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 3px solid var(--gold);
-    object-fit: cover;
-    box-shadow: 0 0 30px rgba(255,215,0,0.4);
-  }
-  .trump-host p {
-    color: var(--gold);
-    font-weight: 700;
-    font-size: 1rem;
-    margin-top: 6px;
-  }
-
-  .mode-btns {
-    display: flex;
-    gap: 10px;
-    margin: 16px 0;
-  }
-  .mode-btn {
-    flex: 1;
-    padding: 14px 8px;
-    border: 2px solid var(--gold);
-    background: transparent;
-    color: var(--gold);
-    font-family: 'Heebo', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .mode-btn.selected, .mode-btn:hover {
-    background: var(--gold);
-    color: var(--dark);
-  }
-
-  .player-name-input {
-    width: 100%;
-    padding: 12px;
-    background: rgba(255,255,255,0.1);
-    border: 2px solid var(--gold);
-    border-radius: 8px;
-    color: white;
-    font-family: 'Heebo', sans-serif;
-    font-size: 1rem;
-    text-align: right;
-    margin: 6px 0;
-  }
-  .player-name-input::placeholder { color: rgba(255,255,255,0.4); }
-
-  .start-btn {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--gold), #FF8C00);
-    color: var(--dark);
-    font-family: 'Secular One', sans-serif;
-    font-size: 1.3rem;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 20px;
-    box-shadow: 0 4px 20px rgba(255,215,0,0.3);
-    transition: transform 0.2s;
-  }
-  .start-btn:hover { transform: scale(1.02); }
-
-  /* ===== GAME SCREEN ===== */
-  .round-header {
-    text-align: center;
-    margin-bottom: 10px;
-  }
+  .round-header { text-align: center; margin-bottom: 12px; }
   .round-badge {
-    display: inline-block;
-    background: var(--red);
-    color: white;
-    font-family: 'Secular One', sans-serif;
-    padding: 4px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    display: inline-block; background: var(--gold); color: #000;
+    font-family: 'Secular One', sans-serif; font-size: 0.85rem;
+    padding: 4px 14px; border-radius: 20px; margin-bottom: 4px;
   }
-  .round-info {
-    color: var(--gold);
-    font-size: 0.85rem;
-    margin-top: 4px;
-  }
+  .round-info { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
 
-  /* Trump animation area */
-  .trump-stage {
-    text-align: center;
-    padding: 10px 0;
-    position: relative;
+  .online-badge {
+    font-size: 0.75rem; color: rgba(255,255,255,0.4);
+    text-align: center; margin-bottom: 8px;
   }
+  .online-badge span { color: var(--gold); font-weight: 700; }
+
+  .scores-bar { display: flex; gap: 10px; margin-bottom: 14px; justify-content: center; }
+  .score-card {
+    background: rgba(255,255,255,0.07); border-radius: 12px;
+    padding: 8px 18px; text-align: center; min-width: 90px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .score-card .name { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+  .score-card .pts { font-size: 1.6rem; font-weight: 900; color: var(--gold); }
+  .score-card.me { border-color: rgba(255,215,0,0.4); }
+
+  .trump-stage { text-align: center; margin-bottom: 10px; position: relative; }
   .trump-stage img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 3px solid var(--gold);
-    object-fit: cover;
+    width: 80px; height: 80px; border-radius: 50%;
+    object-fit: cover; border: 3px solid var(--gold);
+    transition: transform 0.3s;
   }
-  .trump-stage img.playing {
-    animation: trumpBounce 0.5s ease-in-out infinite alternate;
-    box-shadow: 0 0 25px rgba(255,215,0,0.7);
-  }
-  @keyframes trumpBounce {
-    from { transform: scale(1) rotate(-3deg); }
-    to { transform: scale(1.08) rotate(3deg); }
+  .trump-stage img.playing { animation: bounce 0.5s infinite alternate; }
+  @keyframes bounce { to { transform: translateY(-6px) scale(1.05); } }
+
+  .status-msg {
+    font-size: 0.85rem; color: rgba(255,255,255,0.7);
+    margin-top: 6px; min-height: 20px;
   }
 
   .music-bar {
-    height: 6px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-    margin: 8px 16px;
-    overflow: hidden;
+    height: 6px; background: rgba(255,255,255,0.1);
+    border-radius: 3px; margin: 8px 0 12px; overflow: hidden;
   }
-  .music-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold), var(--red));
-    border-radius: 3px;
-    transition: width 0.3s;
-    animation: pulse 1s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
+  .music-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.1s linear; }
 
-  /* Chairs row */
-  .chairs-row {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin: 8px 0;
-  }
-  .chair-icon {
-    font-size: 1.6rem;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-    transition: transform 0.3s;
-  }
-  .chair-icon.taken { filter: grayscale(1) opacity(0.3); }
+  .chairs-row { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .chair-icon { font-size: 1.4rem; }
+  .chair-icon.taken { opacity: 0.3; }
 
-  /* Politicians circle */
   .politicians-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin: 10px 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px; margin-bottom: 14px;
   }
   .pol-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    width: 70px;
-    cursor: pointer;
-    transition: transform 0.2s;
+    text-align: center; cursor: default;
+    transition: transform 0.3s;
   }
   .pol-card img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.2);
-    transition: all 0.3s;
+    width: 60px; height: 60px; border-radius: 50%;
+    object-fit: cover; border: 2px solid rgba(255,255,255,0.2);
   }
-  .pol-card.moving img {
-    animation: polMove 0.4s ease-in-out infinite alternate;
-    border-color: var(--gold);
-  }
-  @keyframes polMove {
-    from { transform: translateX(-4px) rotate(-5deg); }
-    to { transform: translateX(4px) rotate(5deg); }
-  }
-  .pol-card.eliminated img {
-    filter: grayscale(1) opacity(0.25);
-    border-color: var(--red);
-  }
-  .pol-card span {
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.6);
-    text-align: center;
-    line-height: 1.2;
-  }
-  .pol-card.eliminated span { opacity: 0.3; }
+  .pol-card span { display: block; font-size: 0.65rem; margin-top: 3px; }
+  .pol-card.moving { animation: wiggle 0.4s infinite alternate; }
+  @keyframes wiggle { to { transform: translateX(4px) rotate(3deg); } }
+  .pol-card.eliminated img { filter: grayscale(1); opacity: 0.4; }
+  .pol-card.eliminated span { opacity: 0.4; }
 
-  /* Guess section */
   .guess-section {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 12px;
-    padding: 12px;
-    margin: 10px 0;
+    background: rgba(255,255,255,0.07); border-radius: 16px;
+    padding: 16px; margin-bottom: 12px;
+    border: 1px solid rgba(255,215,0,0.2);
   }
-  .guess-section h3 {
-    color: var(--gold);
-    font-size: 0.95rem;
-    margin-bottom: 10px;
-    text-align: center;
-  }
+  .guess-section h3 { color: var(--gold); text-align: center; margin-bottom: 12px; font-size: 1rem; }
   .guess-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px;
+    margin-bottom: 10px;
   }
   .guess-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    background: rgba(255,255,255,0.07);
-    border: 1.5px solid rgba(255,255,255,0.2);
-    border-radius: 8px;
-    padding: 6px 4px;
-    width: 68px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: white;
-    font-family: 'Heebo', sans-serif;
-    font-size: 0.6rem;
+    background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 8px 4px; cursor: pointer; color: white;
+    font-family: 'Heebo', sans-serif; font-size: 0.75rem; text-align: center;
+    transition: border-color 0.15s, background 0.15s;
   }
-  .guess-btn img {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  .guess-btn:hover, .guess-btn.selected {
-    border-color: var(--gold);
-    background: rgba(255,215,0,0.15);
-    transform: scale(1.05);
-  }
-  .guess-btn.correct { border-color: #00cc44; background: rgba(0,204,68,0.2); }
-  .guess-btn.wrong { border-color: var(--red); background: rgba(204,0,0,0.2); }
-
+  .guess-btn img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 4px; }
+  .guess-btn.selected { border-color: var(--gold); background: rgba(255,215,0,0.15); }
   .confirm-guess-btn {
-    display: block;
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px;
-    background: var(--gold);
-    color: var(--dark);
-    font-family: 'Secular One', sans-serif;
-    font-size: 1.1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    width: 100%; padding: 12px; border-radius: 14px; border: none;
+    background: var(--gold); color: #000; font-weight: 700;
+    font-family: 'Heebo', sans-serif; font-size: 0.95rem; cursor: pointer;
   }
   .confirm-guess-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Score bar */
-  .scores-bar {
-    display: flex;
-    gap: 8px;
-    margin: 8px 0;
+  .waiting-guess {
+    text-align: center; padding: 16px; color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
   }
-  .score-card {
-    flex: 1;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px;
-    padding: 8px;
-    text-align: center;
-  }
-  .score-card .name { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
-  .score-card .pts { font-size: 1.4rem; font-weight: 900; color: var(--gold); }
 
-  /* Round result */
   .round-result {
-    text-align: center;
-    padding: 16px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    margin: 10px 0;
-    display: none;
+    background: rgba(255,255,255,0.08); border-radius: 16px;
+    padding: 20px; text-align: center; display: none;
+    border: 1px solid rgba(255,215,0,0.3);
+    margin-bottom: 12px;
   }
   .round-result.show { display: block; }
-  .result-icon { font-size: 3rem; }
-  .result-text { font-size: 1.1rem; font-weight: 700; margin: 8px 0; }
-  .result-who { color: var(--gold); font-size: 0.9rem; }
-
+  .result-icon { font-size: 2rem; margin-bottom: 8px; }
+  .result-text { font-size: 1rem; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+  .result-who { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 14px; }
   .next-round-btn {
-    margin-top: 12px;
-    padding: 12px 24px;
-    background: var(--blue);
-    color: white;
-    border: 2px solid var(--gold);
-    font-family: 'Secular One', sans-serif;
-    font-size: 1rem;
-    border-radius: 8px;
-    cursor: pointer;
+    background: var(--gold); color: #000; border: none; border-radius: 14px;
+    padding: 12px 28px; font-weight: 700; cursor: pointer;
+    font-family: 'Heebo', sans-serif; font-size: 0.95rem;
   }
 
-  /* ===== WINNER SCREEN ===== */
-  #winnerScreen {
-    text-align: center;
-    padding: 20px 12px;
-  }
-  .winner-trump {
-    font-size: 3rem;
-    margin: 10px 0;
-    animation: trumpCelebrate 0.8s ease-in-out infinite alternate;
-  }
-  @keyframes trumpCelebrate {
-    from { transform: scale(1) rotate(-5deg); }
-    to { transform: scale(1.15) rotate(5deg); }
-  }
-  .winner-pol img {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--gold);
-    box-shadow: 0 0 40px rgba(255,215,0,0.6);
-    animation: winnerGlow 1s ease-in-out infinite alternate;
-  }
-  @keyframes winnerGlow {
-    from { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
-    to { box-shadow: 0 0 60px rgba(255,215,0,0.9); }
-  }
-  .winner-name {
-    font-family: 'Secular One', sans-serif;
-    font-size: 2rem;
-    color: var(--gold);
-    margin: 12px 0 4px;
-  }
-  .winner-subtitle { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
-
-  .final-scores {
-    margin: 20px 0;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 16px;
-  }
-  .final-scores h3 { color: var(--gold); margin-bottom: 12px; }
-  .final-score-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    font-size: 0.95rem;
-  }
-  .final-score-row:last-child { border-bottom: none; }
-  .trophy { font-size: 1.2rem; }
-
+  /* WINNER */
+  .winner-screen { text-align: center; padding: 20px 0; }
+  .winner-screen h1 { font-family: 'Secular One', sans-serif; color: var(--gold); font-size: 2rem; }
+  .winner-pol img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--gold); margin: 16px auto; display: block; }
+  .winner-name { font-size: 1.6rem; font-weight: 900; color: white; }
+  .winner-subtitle { color: var(--gold); margin-bottom: 20px; }
+  .final-scores { background: rgba(255,255,255,0.07); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+  .final-score-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
   .play-again-btn {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--gold), #FF8C00);
-    color: var(--dark);
-    font-family: 'Secular One', sans-serif;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 10px;
+    background: var(--gold); color: #000; border: none; border-radius: 16px;
+    padding: 14px 32px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    font-family: 'Heebo', sans-serif;
   }
 
-  .confetti {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 999;
-  }
-  .confetti-piece {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    animation: fall linear forwards;
-  }
-  @keyframes fall {
-    from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-  }
+  /* CONFETTI */
+  .confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+  .confetti-piece { position: absolute; border-radius: 2px; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
-  .status-msg {
-    text-align: center;
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.7);
-    min-height: 24px;
-    margin: 4px 0;
-  }
-
-  /* player2 label */
-  .player2-label {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.5);
-    margin-top: 2px;
-  }
+  /* HOST ONLY indicator */
+  .host-only { display: none; }
+  .is-host .host-only { display: block; }
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
-<div id="setupScreen" class="screen active">
-  <h1>🪑 כיסאות מוזיקליים פוליטיים</h1>
-  
-  <div class="trump-host">
-    <img src="https://raw.githubusercontent.com/yaronzlot/primeminister/main/images/Trump.jpg" 
-         onerror="this.style.fontSize='3rem';this.src=''" alt="Trump">
-    <p>🎵 טראמפ המנחה 🎵</p>
-  </div>
+<!-- LOBBY -->
+<div id="lobbyScreen" class="lobby-screen">
+  <div style="font-size:2.5rem;margin-bottom:8px">🪑</div>
+  <h1>כיסאות מוזיקליים פוליטיים</h1>
+  <div class="lobby-sub">בחר מצב משחק</div>
 
-  <div style="margin-bottom:12px">
-    <label style="color:var(--gold);font-size:0.9rem;display:block;margin-bottom:6px">מצב משחק:</label>
-    <div class="mode-btns">
-      <button class="mode-btn selected" onclick="selectMode('solo')" id="btnSolo">🤖 נגד מחשב</button>
-      <button class="mode-btn" onclick="selectMode('multi')" id="btnMulti">👥 שני שחקנים</button>
-    </div>
-  </div>
+  <input type="text" id="myName" style="display:none">
 
-  <input type="text" class="player-name-input" id="player1Name" placeholder="שם שחקן 1" value="שחקן 1">
-  <div id="player2NameWrap" style="display:none">
-    <input type="text" class="player-name-input" id="player2Name" placeholder="שם שחקן 2" value="שחקן 2">
-  </div>
+  <button class="lobby-btn btn-invite" onclick="createRoom()">🤝 צרף חבר אונליין</button>
+  <button class="lobby-btn btn-solo" onclick="startSolo()">🤖 שחק נגד מחשב</button>
 
-  <button class="start-btn" onclick="startGame()">▶ התחל משחק</button>
+  <div class="lobby-err" id="lobbyErr"></div>
+</div>
+
+<!-- WAITING -->
+<div id="waitingScreen" class="lobby-screen" style="display:none">
+  <div class="waiting-box">
+    <h2>ממתין לחבר...</h2>
+    <div class="waiting-hint">שלח לחבר את הקישור שנשלח</div>
+    <div class="spinner"></div>
+    <div class="waiting-hint" style="font-size:0.75rem;margin-top:0">כשהוא יצטרף המשחק יתחיל אוטומטית</div>
+    <button class="cancel-btn" onclick="cancelRoom()">בטל</button>
+  </div>
 </div>
 
 <!-- GAME SCREEN -->
 <div id="gameScreen" class="screen">
   <div class="round-header">
     <div class="round-badge" id="roundBadge">סיבוב 1</div>
-    <div class="round-info" id="roundInfo">נותרו 10 פוליטיקאים, 9 כיסאות</div>
+    <div class="round-info" id="roundInfo"></div>
   </div>
+
+  <div class="online-badge" id="onlineBadge"></div>
 
   <div class="scores-bar" id="scoresBar"></div>
 
   <div class="trump-stage">
     <img id="trumpImg" src="https://raw.githubusercontent.com/yaronzlot/primeminister/main/images/Trump.jpg" alt="Trump">
-    <div id="playMusicBtn" onclick="userStartMusic()" style="display:none;margin:8px auto;background:var(--gold);color:#000;font-family:'Secular One',sans-serif;font-size:1rem;padding:10px 24px;border-radius:20px;cursor:pointer;width:fit-content;box-shadow:0 0 20px rgba(255,215,0,0.5)">🎵 הפעל מוזיקה</div>
-    <div class="status-msg" id="statusMsg">טראמפ מנגן! הפוליטיקאים זזים...</div>
+    <div id="playMusicBtn" onclick="userStartMusic()" style="display:none;margin:8px auto;background:var(--gold);color:#000;font-family:'Secular One',sans-serif;font-size:1rem;padding:10px 24px;border-radius:20px;cursor:pointer;width:fit-content">🎵 הפעל מוזיקה</div>
+    <div class="status-msg" id="statusMsg"></div>
   </div>
 
   <div class="music-bar"><div class="music-fill" id="musicFill" style="width:100%"></div></div>
-
   <div class="chairs-row" id="chairsRow"></div>
-
   <div class="politicians-grid" id="polGrid"></div>
 
   <div class="guess-section" id="guessSection" style="display:none">
     <h3>🤔 מי יישאר בלי כסא?</h3>
     <div class="guess-grid" id="guessGrid"></div>
     <button class="confirm-guess-btn" id="confirmGuessBtn" disabled onclick="confirmGuess()">אשר ניחוש</button>
-    <div id="p2GuessWrap" style="display:none; margin-top:10px;">
-      <h3 id="p2GuessTitle" style="color:var(--gold);font-size:0.9rem;text-align:center;margin-bottom:8px"></h3>
-      <div class="guess-grid" id="guessGrid2"></div>
-      <button class="confirm-guess-btn" id="confirmGuessBtn2" disabled onclick="confirmGuess2()">אשר ניחוש</button>
-    </div>
+    <div class="waiting-guess" id="waitingForOther" style="display:none">⏳ ממתין לניחוש השני...</div>
   </div>
 
   <div class="round-result" id="roundResult">
     <div class="result-icon" id="resultIcon"></div>
     <div class="result-text" id="resultText"></div>
     <div class="result-who" id="resultWho"></div>
-    <button class="next-round-btn" onclick="nextRound()">סיבוב הבא ▶</button>
+    <button class="next-round-btn host-only" id="nextRoundBtn" onclick="hostNextRound()">סיבוב הבא ▶</button>
+  </div>
+
+  <div style="text-align:center;margin-top:12px">
+    <button class="cancel-btn" onclick="leaveGame()">🚪 עזוב</button>
   </div>
 </div>
 
 <!-- WINNER SCREEN -->
-<div id="winnerScreen" class="screen">
+<div id="winnerScreen" class="screen winner-screen">
   <h1>🏆 ניצח!</h1>
-  <div class="winner-trump">🎺</div>
-  <div class="winner-pol">
-    <img id="winnerImg" src="" alt="">
-  </div>
+  <div class="winner-pol"><img id="winnerImg" src="" alt=""></div>
   <div class="winner-name" id="winnerName"></div>
   <div class="winner-subtitle">ראש הממשלה!</div>
-  
   <div class="final-scores" id="finalScores"></div>
-  
   <button class="play-again-btn" onclick="playAgain()">🔄 משחק חדש</button>
 </div>
 
 <div class="confetti" id="confetti"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update, remove, push }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD2SECYc_9V7NDASMzSzf0Se5OL6NyU8wA",
+  authDomain: "priel-af970.firebaseapp.com",
+  databaseURL: "https://priel-af970-default-rtdb.firebaseio.com",
+  projectId: "priel-af970",
+  storageBucket: "priel-af970.firebasestorage.app",
+  messagingSenderId: "816586982849",
+  appId: "1:816586982849:web:b991437452fffae36e5b40"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ── DATA ──
 const POLITICIANS = [
   { id: 'Bibi',     name: 'נתניהו' },
   { id: 'Benet',    name: 'בנט' },
   { id: 'Liberman', name: 'ליברמן' },
   { id: 'Gadi',     name: 'איזנקוט' },
 ];
-
 const IMG_BASE = 'https://raw.githubusercontent.com/yaronzlot/primeminister/main/images/';
-
-// Music URLs (free, no CORS issues)
-const GAME_MUSIC = 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Hail_to_the_Chief_%28no_intro%29.ogg';
-const WIN_MUSIC  = 'https://upload.wikimedia.org/wikipedia/commons/1/18/We_Are_the_Champions.ogg';
-
-let gameMode = 'solo'; // 'solo' or 'multi'
-let players = [];
-let round = 0;
-let remaining = [];
-let eliminated = [];
-let musicInterval = null;
-let musicTime = 0;
-let musicDuration = 0;
-let phase = 'playing'; // playing | guessing | result
-let playerGuess = null;
-let player2Guess = null;
-let p1GuessConfirmed = false;
-let p2GuessConfirmed = false;
-let loser = null;
-
-function selectMode(m) {
-  gameMode = m;
-  document.getElementById('btnSolo').classList.toggle('selected', m === 'solo');
-  document.getElementById('btnMulti').classList.toggle('selected', m === 'multi');
-  document.getElementById('player2NameWrap').style.display = m === 'multi' ? 'block' : 'none';
-}
-
 function imgUrl(id) { return IMG_BASE + id + '.jpg'; }
 
-function startGame() {
-  const p1 = document.getElementById('player1Name').value.trim() || 'שחקן 1';
-  const p2 = document.getElementById('player2Name').value.trim() || 'שחקן 2';
+// ── STATE ──
+let roomCode = null;
+let myRole = null; // 'host' | 'guest'
+let myName = '';
+let unsubscribe = null;
+let gameState = null; // latest from Firebase
+let audioUnlocked = false;
+let musicInterval = null;
+let myGuess = null;
+let myGuessConfirmed = false;
 
-  players = [{ name: p1, score: 0 }];
-  if (gameMode === 'multi') {
-    players.push({ name: p2, score: 0 });
+// Solo state
+let isSolo = false;
+let soloPlayers = [];
+let soloRemaining = [];
+let soloEliminated = [];
+let soloRound = 0;
+let soloPhase = 'playing';
+let soloLoser = null;
+let soloP1Guess = null;
+let soloP2Guess = null;
+let soloP1Confirmed = false;
+let soloP2Confirmed = false;
+
+// ── AUDIO ──
+const audio = new Audio('https://yaronzlot.github.io/primeminister/audio/BetteDavisEyes.mp3');
+audio.loop = true; audio.volume = 0.6;
+function playMusic() { audio.play().catch(()=>{}); }
+function pauseAudio() { audio.pause(); }
+function stopAudio() { audio.pause(); audio.currentTime = 0; }
+function playWinMusic() { audio.pause(); audio.currentTime=0; audio.loop=false; audio.volume=0.8; audio.play().catch(()=>{}); }
+
+// ── SCREENS ──
+function showScreen(id) {
+  ['lobbyScreen','waitingScreen','gameScreen','winnerScreen'].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.style.display = s === id ? (s === 'lobbyScreen' || s === 'waitingScreen' ? 'block' : 'block') : 'none';
+  });
+  if (id === 'gameScreen') document.getElementById('gameScreen').classList.add('active');
+  else document.getElementById('gameScreen').classList.remove('active');
+}
+
+function randomCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
+
+// ── CREATE ROOM ──
+window.createRoom = async function() {
+  myName = document.getElementById('myName').value.trim() || 'שחקן 1';
+  let code;
+  for (let i = 0; i < 10; i++) {
+    code = randomCode();
+    const snap = await get(ref(db, `chairs_rooms/${code}`));
+    if (!snap.exists()) break;
+  }
+  await set(ref(db, `chairs_rooms/${code}`), {
+    status: 'waiting',
+    host: myName,
+    guest: null,
+    remaining: POLITICIANS.map(p => p.id),
+    eliminated: [],
+    round: 0,
+    phase: 'waiting', // waiting | playing | guessing | result | gameover
+    loser: null,
+    scores: { host: 0, guest: 0 },
+    hostGuess: null,
+    guestGuess: null,
+    hostConfirmed: false,
+    guestConfirmed: false,
+    musicStop: null,
+  });
+  roomCode = code;
+  myRole = 'host';
+  document.body.classList.add('is-host');
+  showScreen('waitingScreen');
+  listenRoom();
+
+  // Share link
+  const url = `${location.origin}${location.pathname}?room=${code}`;
+  const text = `בוא נשחק כיסאות מוזיקליים פוליטיים! לחץ להצטרף: ${url}`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'כיסאות מוזיקליים', text }); } catch(e) {}
   } else {
-    players.push({ name: '🤖 מחשב', score: 0, isAI: true });
+    await navigator.clipboard.writeText(text).catch(()=>{});
+    alert('הקישור הועתק! שלח לחבר בווטסאפ 📋\n\n' + url);
+  }
+};
+
+// ── CANCEL ──
+window.cancelRoom = async function() {
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (roomCode) { await remove(ref(db, `chairs_rooms/${roomCode}`)); roomCode = null; }
+  myRole = null; document.body.classList.remove('is-host');
+  history.replaceState({}, '', location.pathname);
+  showScreen('lobbyScreen');
+};
+
+// ── LISTEN ROOM ──
+function listenRoom() {
+  if (unsubscribe) unsubscribe();
+  unsubscribe = onValue(ref(db, `chairs_rooms/${roomCode}`), snap => {
+    if (!snap.exists()) { showScreen('lobbyScreen'); return; }
+    gameState = snap.val();
+
+    if (gameState.status === 'waiting') {
+      showScreen('waitingScreen');
+      return;
+    }
+
+    // Game started
+    if (gameState.phase === 'gameover') {
+      handleGameover();
+      return;
+    }
+
+    showScreen('gameScreen');
+    renderOnlineGame();
+  });
+}
+
+// ── RENDER ONLINE GAME ──
+function renderOnlineGame() {
+  if (!gameState) return;
+  const remaining = (gameState.remaining || []).map(id => POLITICIANS.find(p => p.id === id)).filter(Boolean);
+  const eliminated = (gameState.eliminated || []).map(id => POLITICIANS.find(p => p.id === id)).filter(Boolean);
+
+  document.getElementById('roundBadge').textContent = `סיבוב ${gameState.round}`;
+  document.getElementById('roundInfo').textContent = `נותרו ${remaining.length} פוליטיקאים, ${remaining.length - 1} כיסאות`;
+  document.getElementById('onlineBadge').innerHTML = `🌐 חדר: <span>${roomCode}</span> · ${gameState.host} vs ${gameState.guest || '...'}`;
+
+  // Scores
+  const scoresBar = document.getElementById('scoresBar');
+  const isHost = myRole === 'host';
+  scoresBar.innerHTML = `
+    <div class="score-card ${isHost ? 'me' : ''}">
+      <div class="name">${gameState.host}${isHost ? ' (אני)' : ''}</div>
+      <div class="pts">${gameState.scores?.host || 0}</div>
+    </div>
+    <div class="score-card ${!isHost ? 'me' : ''}">
+      <div class="name">${gameState.guest || '...'}${!isHost ? ' (אני)' : ''}</div>
+      <div class="pts">${gameState.scores?.guest || 0}</div>
+    </div>
+  `;
+
+  renderChairs(remaining);
+  renderPoliticians(remaining, eliminated, gameState.phase === 'playing');
+
+  if (gameState.phase === 'playing') {
+    document.getElementById('guessSection').style.display = 'none';
+    document.getElementById('roundResult').classList.remove('show');
+    // Host controls music
+    if (myRole === 'host') {
+      if (!audioUnlocked) {
+        document.getElementById('playMusicBtn').style.display = 'block';
+        document.getElementById('statusMsg').textContent = 'לחץ על הכפתור להפעלת המוזיקה 🎵';
+      }
+    } else {
+      document.getElementById('playMusicBtn').style.display = 'none';
+      document.getElementById('statusMsg').textContent = '🎵 ממתין שהמארח יפעיל מוזיקה...';
+    }
+
+    // Check if host triggered music stop
+    if (gameState.musicStop && gameState.musicStop !== myGuess) {
+      // Music stopped by host — show guessing for everyone
+      handleMusicStopped(remaining);
+    }
   }
 
-  remaining = [...POLITICIANS];
-  eliminated = [];
-  round = 0;
+  if (gameState.phase === 'guessing') {
+    document.getElementById('playMusicBtn').style.display = 'none';
+    showGuessingUI(remaining);
+  }
 
-  showScreen('gameScreen');
-  startRound();
+  if (gameState.phase === 'result') {
+    document.getElementById('guessSection').style.display = 'none';
+    showRoundResultUI(remaining, eliminated);
+  }
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function showGuessingUI(remaining) {
+  const gs = document.getElementById('guessSection');
+  gs.style.display = 'block';
+
+  if (!myGuessConfirmed) {
+    buildGuessGrid('guessGrid', remaining);
+    document.getElementById('confirmGuessBtn').style.display = 'block';
+    document.getElementById('waitingForOther').style.display = 'none';
+  } else {
+    document.getElementById('guessGrid').innerHTML = '';
+    document.getElementById('confirmGuessBtn').style.display = 'none';
+    document.getElementById('waitingForOther').style.display = 'block';
+  }
 }
 
-let audioUnlocked = false;
+function buildGuessGrid(containerId, remaining) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  remaining.forEach(pol => {
+    const btn = document.createElement('button');
+    btn.className = 'guess-btn' + (myGuess && myGuess === pol.id ? ' selected' : '');
+    btn.dataset.id = pol.id;
+    btn.innerHTML = `<img src="${imgUrl(pol.id)}" onerror="this.style.display='none'"><span>${pol.name}</span>`;
+    btn.onclick = () => {
+      myGuess = pol.id;
+      document.querySelectorAll('#guessGrid .guess-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('confirmGuessBtn').disabled = false;
+    };
+    grid.appendChild(btn);
+  });
+}
 
-function userStartMusic() {
+window.confirmGuess = async function() {
+  if (!myGuess) return;
+  myGuessConfirmed = true;
+  document.getElementById('confirmGuessBtn').disabled = true;
+  document.getElementById('waitingForOther').style.display = 'block';
+  document.getElementById('guessGrid').innerHTML = '';
+  document.getElementById('confirmGuessBtn').style.display = 'none';
+
+  const field = myRole === 'host' ? 'hostGuess' : 'guestGuess';
+  const confirmed = myRole === 'host' ? 'hostConfirmed' : 'guestConfirmed';
+  await update(ref(db, `chairs_rooms/${roomCode}`), {
+    [field]: myGuess,
+    [confirmed]: true,
+  });
+
+  // Check if both confirmed — host resolves
+  if (myRole === 'host') {
+    const snap = await get(ref(db, `chairs_rooms/${roomCode}`));
+    const s = snap.val();
+    if (s.hostConfirmed && s.guestConfirmed) resolveRound(s);
+  }
+};
+
+// Host watches for both guesses
+function checkBothGuessed(s) {
+  if (myRole !== 'host') return;
+  if (s.hostConfirmed && s.guestConfirmed) resolveRound(s);
+}
+
+async function resolveRound(s) {
+  const remaining = (s.remaining || []).map(id => POLITICIANS.find(p => p.id === id)).filter(Boolean);
+  const loserId = s.loser;
+  const hostCorrect = s.hostGuess === loserId;
+  const guestCorrect = s.guestGuess === loserId;
+
+  const newScores = {
+    host: (s.scores?.host || 0) + (hostCorrect ? 1 : 0),
+    guest: (s.scores?.guest || 0) + (guestCorrect ? 1 : 0),
+  };
+
+  let newRemaining = s.remaining;
+  let newEliminated = s.eliminated || [];
+
+  const anyCorrect = hostCorrect || guestCorrect;
+  if (anyCorrect) {
+    newEliminated = [...newEliminated, loserId];
+    newRemaining = s.remaining.filter(id => id !== loserId);
+  }
+
+  const isGameover = newRemaining.length === 1;
+
+  await update(ref(db, `chairs_rooms/${roomCode}`), {
+    scores: newScores,
+    remaining: newRemaining,
+    eliminated: newEliminated,
+    phase: isGameover ? 'gameover' : 'result',
+    resultHostCorrect: hostCorrect,
+    resultGuestCorrect: guestCorrect,
+    resultAnyCorrect: anyCorrect,
+  });
+}
+
+function showRoundResultUI(remaining, eliminated) {
+  if (!gameState) return;
+  const loserId = gameState.loser;
+  const loser = POLITICIANS.find(p => p.id === loserId);
+  const hostCorrect = gameState.resultHostCorrect;
+  const guestCorrect = gameState.resultGuestCorrect;
+
+  let resultHTML = '';
+  if (hostCorrect && guestCorrect) resultHTML = 'שניכם צדקתם! 🎯 +1 לכל אחד';
+  else if (hostCorrect) resultHTML = `${gameState.host} צדק! 🎯 +1`;
+  else if (guestCorrect) resultHTML = `${gameState.guest} צדק! 🎯 +1`;
+  else resultHTML = 'אף אחד לא צדק 😅';
+
+  document.getElementById('resultIcon').textContent = (hostCorrect || guestCorrect) ? '✅' : '🔄';
+  document.getElementById('resultText').textContent = resultHTML;
+  document.getElementById('resultWho').textContent = loser ? `${loser.name} נשאר בלי כסא!` : '';
+  document.getElementById('roundResult').classList.add('show');
+
+  const nextBtn = document.getElementById('nextRoundBtn');
+  if (myRole === 'host') {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = gameState.resultAnyCorrect ? 'סיבוב הבא ▶' : '🔄 סיבוב חוזר!';
+  } else {
+    nextBtn.style.display = 'none';
+  }
+}
+
+window.hostNextRound = async function() {
+  if (myRole !== 'host') return;
+  const s = gameState;
+  myGuess = null;
+  myGuessConfirmed = false;
+  await update(ref(db, `chairs_rooms/${roomCode}`), {
+    round: (s.round || 0) + 1,
+    phase: 'playing',
+    loser: null,
+    hostGuess: null,
+    guestGuess: null,
+    hostConfirmed: false,
+    guestConfirmed: false,
+    musicStop: null,
+    resultHostCorrect: false,
+    resultGuestCorrect: false,
+    resultAnyCorrect: false,
+  });
+  audioUnlocked = false;
+  document.getElementById('roundResult').classList.remove('show');
+  document.getElementById('playMusicBtn').style.display = 'block';
+};
+
+function handleMusicStopped(remaining) {
+  pauseAudio();
+  document.getElementById('trumpImg').classList.remove('playing');
+  document.querySelectorAll('.pol-card').forEach(c => c.classList.remove('moving'));
+  document.getElementById('musicFill').style.width = '0%';
+  document.getElementById('statusMsg').textContent = 'המוזיקה עצרה! מי נשאר בלי כסא?';
+  myGuess = null; // will be used as sentinel to avoid re-trigger
+}
+
+function handleGameover() {
+  if (!gameState) return;
+  const winnerId = gameState.remaining?.[0];
+  const winner = POLITICIANS.find(p => p.id === winnerId);
+  playWinMusic();
+  showScreen('winnerScreen');
+  if (winner) {
+    document.getElementById('winnerImg').src = imgUrl(winner.id);
+    document.getElementById('winnerName').textContent = winner.name;
+  }
+  const sorted = [
+    { name: gameState.host, score: gameState.scores?.host || 0 },
+    { name: gameState.guest, score: gameState.scores?.guest || 0 },
+  ].sort((a,b) => b.score - a.score);
+  const medals = ['🥇','🥈'];
+  document.getElementById('finalScores').innerHTML = `
+    <h3 style="color:var(--gold);margin-bottom:12px">תוצאות המשחק</h3>
+    ${sorted.map((p,i) => `
+      <div class="final-score-row">
+        <span>${medals[i]} ${p.name}</span>
+        <span style="color:var(--gold);font-weight:700">${p.score} נקודות</span>
+      </div>
+    `).join('')}
+  `;
+  launchConfetti();
+}
+
+// ── HOST MUSIC CONTROL ──
+window.userStartMusic = async function() {
+  if (myRole !== 'host' && !isSolo) return;
   document.getElementById('playMusicBtn').style.display = 'none';
   audioUnlocked = true;
   playMusic();
@@ -602,202 +692,203 @@ function userStartMusic() {
   document.querySelectorAll('.pol-card').forEach(c => c.classList.add('moving'));
   document.getElementById('statusMsg').textContent = 'טראמפ מנגן! הפוליטיקאים זזים...';
 
-  // Start countdown timer
-  musicDuration = 3000 + Math.random() * 3000;
-  musicTime = 0;
+  if (isSolo) { startSoloMusicTimer(); return; }
+
+  // Online: pick loser now, set timer, then write to Firebase
+  const remaining = (gameState.remaining || []);
+  const loserId = remaining[Math.floor(Math.random() * remaining.length)];
+  const duration = 3000 + Math.random() * 3000;
+
+  let musicTime = 0;
   const tick = 100;
   clearInterval(musicInterval);
-  musicInterval = setInterval(() => {
+  musicInterval = setInterval(async () => {
     musicTime += tick;
-    const pct = Math.max(0, 100 - (musicTime / musicDuration * 100));
+    const pct = Math.max(0, 100 - (musicTime / duration * 100));
     document.getElementById('musicFill').style.width = pct + '%';
-    if (musicTime >= musicDuration) {
+    if (musicTime >= duration) {
       clearInterval(musicInterval);
-      stopMusic();
+      pauseAudio();
+      document.getElementById('trumpImg').classList.remove('playing');
+      document.querySelectorAll('.pol-card').forEach(c => c.classList.remove('moving'));
+      document.getElementById('musicFill').style.width = '0%';
+      document.getElementById('statusMsg').textContent = 'המוזיקה עצרה! מי נשאר בלי כסא?';
+      myGuess = null;
+      myGuessConfirmed = false;
+      // Write to Firebase
+      await update(ref(db, `chairs_rooms/${roomCode}`), {
+        loser: loserId,
+        phase: 'guessing',
+        hostGuess: null,
+        guestGuess: null,
+        hostConfirmed: false,
+        guestConfirmed: false,
+        musicStop: Date.now(),
+      });
     }
   }, tick);
-}
+};
 
-function startRound() {
-  round++;
-  phase = 'playing';
-  playerGuess = null;
-  player2Guess = null;
-  p1GuessConfirmed = false;
-  p2GuessConfirmed = false;
-  loser = null;
-
-  document.getElementById('roundResult').classList.remove('show');
-  document.getElementById('guessSection').style.display = 'none';
-
-  const chairs = remaining.length - 1;
-  document.getElementById('roundBadge').textContent = `סיבוב ${round}`;
-  document.getElementById('roundInfo').textContent = `נותרו ${remaining.length} פוליטיקאים, ${chairs} כיסאות`;
-
-  renderScores();
-  renderChairs();
-  renderPoliticians(false);
-
-  // Show play button only on first round, auto-play after
-  if (audioUnlocked) {
-    userStartMusic();
-  } else {
-    document.getElementById('playMusicBtn').style.display = 'block';
-    document.getElementById('statusMsg').textContent = 'לחץ על הכפתור להפעלת המוזיקה 🎵';
-    document.getElementById('trumpImg').classList.remove('playing');
+// Watch for both confirmed (guest side)
+let lastWatchedConfirm = null;
+function watchForBothConfirmed(s) {
+  if (myRole !== 'host') return;
+  if (s.hostConfirmed && s.guestConfirmed && s.phase === 'guessing') {
+    const key = s.hostGuess + s.guestGuess;
+    if (key !== lastWatchedConfirm) {
+      lastWatchedConfirm = key;
+      resolveRound(s);
+    }
   }
 }
 
-function stopMusic() {
-  pauseAudio();
-  document.getElementById('trumpImg').classList.remove('playing');
-  document.querySelectorAll('.pol-card').forEach(c => c.classList.remove('moving'));
-  document.getElementById('musicFill').style.width = '0%';
-  document.getElementById('statusMsg').textContent = 'המוזיקה עצרה! מי נשאר בלי כסא?';
-  
-  // Pick random loser
-  loser = remaining[Math.floor(Math.random() * remaining.length)];
+// Override onValue handler to also watch for both confirmed
+const origListen = listenRoom;
+function listenRoom2() {
+  if (unsubscribe) unsubscribe();
+  unsubscribe = onValue(ref(db, `chairs_rooms/${roomCode}`), snap => {
+    if (!snap.exists()) { showScreen('lobbyScreen'); return; }
+    gameState = snap.val();
 
-  phase = 'guessing';
-  showGuessSection();
-}
+    if (gameState.status === 'waiting') { showScreen('waitingScreen'); return; }
+    if (gameState.phase === 'gameover') { handleGameover(); return; }
 
-function showGuessSection() {
-  const gs = document.getElementById('guessSection');
-  gs.style.display = 'block';
+    // Guest: reset guess state on new round
+    if (gameState.phase === 'playing' && myGuessConfirmed) {
+      myGuess = null;
+      myGuessConfirmed = false;
+    }
 
-  // Build guess grid for player 1
-  buildGuessGrid('guessGrid', 1);
+    showScreen('gameScreen');
+    renderOnlineGame();
 
-  // Player 2 / AI
-  const p2 = players[1];
-  if (p2.isAI) {
-    // AI guesses randomly after short delay
-    setTimeout(() => {
-      player2Guess = remaining[Math.floor(Math.random() * remaining.length)];
-      p2GuessConfirmed = true;
-      checkBothGuessed();
-    }, 500 + Math.random() * 1500);
-  } else {
-    document.getElementById('p2GuessWrap').style.display = 'block';
-    document.getElementById('p2GuessTitle').textContent = `${p2.name} — מי יישאר?`;
-    buildGuessGrid('guessGrid2', 2);
-    document.getElementById('confirmGuessBtn2').disabled = true;
-  }
-}
-
-function buildGuessGrid(containerId, playerNum) {
-  const grid = document.getElementById(containerId);
-  grid.innerHTML = '';
-  remaining.forEach(pol => {
-    const btn = document.createElement('button');
-    btn.className = 'guess-btn';
-    btn.dataset.id = pol.id;
-    btn.innerHTML = `<img src="${imgUrl(pol.id)}" onerror="this.style.display='none'"><span>${pol.name}</span>`;
-    btn.onclick = () => selectGuess(pol, playerNum);
-    grid.appendChild(btn);
+    // Host: check if both guessed
+    if (myRole === 'host' && gameState.phase === 'guessing') {
+      watchForBothConfirmed(gameState);
+    }
   });
 }
 
-function selectGuess(pol, playerNum) {
-  if (playerNum === 1 && p1GuessConfirmed) return;
-  if (playerNum === 2 && p2GuessConfirmed) return;
+// ── LEAVE ──
+window.leaveGame = async function() {
+  clearInterval(musicInterval);
+  stopAudio();
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (roomCode) { await remove(ref(db, `chairs_rooms/${roomCode}`)); roomCode = null; }
+  myRole = null; isSolo = false;
+  document.body.classList.remove('is-host');
+  history.replaceState({}, '', location.pathname);
+  showScreen('lobbyScreen');
+};
 
-  const gridId = playerNum === 1 ? 'guessGrid' : 'guessGrid2';
-  document.querySelectorAll(`#${gridId} .guess-btn`).forEach(b => b.classList.remove('selected'));
-  const btn = document.querySelector(`#${gridId} .guess-btn[data-id="${pol.id}"]`);
-  if (btn) btn.classList.add('selected');
+window.playAgain = function() {
+  leaveGame();
+};
 
-  if (playerNum === 1) {
-    playerGuess = pol;
-    document.getElementById('confirmGuessBtn').disabled = false;
+// ── AUTO JOIN ──
+(async function() {
+  const params = new URLSearchParams(location.search);
+  const roomParam = params.get('room');
+  if (!roomParam) return;
+  const errEl = document.getElementById('lobbyErr');
+  const snap = await get(ref(db, `chairs_rooms/${roomParam}`));
+  if (!snap.exists()) { errEl.textContent = 'החדר לא נמצא 🤷'; history.replaceState({}, '', location.pathname); return; }
+  if (snap.val().status !== 'waiting') { errEl.textContent = 'החדר כבר מלא'; history.replaceState({}, '', location.pathname); return; }
+
+  myName = document.getElementById('myName').value.trim() || 'שחקן 2';
+  await update(ref(db, `chairs_rooms/${roomParam}`), { status: 'playing', guest: myName });
+  roomCode = roomParam;
+  myRole = 'guest';
+  history.replaceState({}, '', location.pathname);
+  listenRoom2();
+})();
+
+// Override createRoom to use listenRoom2
+window.createRoom = async function() {
+  myName = document.getElementById('myName').value.trim() || 'שחקן 1';
+  let code;
+  for (let i = 0; i < 10; i++) {
+    code = randomCode();
+    const snap = await get(ref(db, `chairs_rooms/${code}`));
+    if (!snap.exists()) break;
+  }
+  await set(ref(db, `chairs_rooms/${code}`), {
+    status: 'waiting',
+    host: myName,
+    guest: null,
+    remaining: POLITICIANS.map(p => p.id),
+    eliminated: [],
+    round: 1,
+    phase: 'playing',
+    loser: null,
+    scores: { host: 0, guest: 0 },
+    hostGuess: null,
+    guestGuess: null,
+    hostConfirmed: false,
+    guestConfirmed: false,
+    musicStop: null,
+  });
+  roomCode = code;
+  myRole = 'host';
+  document.body.classList.add('is-host');
+  showScreen('waitingScreen');
+  listenRoom2();
+
+  const url = `${location.origin}${location.pathname}?room=${code}`;
+  const text = `בוא נשחק כיסאות מוזיקליים פוליטיים! לחץ להצטרף: ${url}`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'כיסאות מוזיקליים', text }); } catch(e) {}
   } else {
-    player2Guess = pol;
-    document.getElementById('confirmGuessBtn2').disabled = false;
+    await navigator.clipboard.writeText(text).catch(()=>{});
+    alert('הקישור הועתק! שלח לחבר בווטסאפ 📋\n\n' + url);
   }
-}
+};
 
-function confirmGuess() {
-  if (!playerGuess) return;
-  p1GuessConfirmed = true;
-  document.getElementById('confirmGuessBtn').disabled = true;
-  document.getElementById('statusMsg').textContent = `${players[0].name} ניחש: ${playerGuess.name}`;
-  checkBothGuessed();
-}
+// ── SOLO MODE ──
+window.startSolo = function() {
+  myName = document.getElementById('myName').value.trim() || 'שחקן 1';
+  isSolo = true;
+  soloPlayers = [{ name: myName, score: 0 }, { name: '🤖 מחשב', score: 0, isAI: true }];
+  soloRemaining = [...POLITICIANS];
+  soloEliminated = [];
+  soloRound = 0;
+  audioUnlocked = false;
+  showScreen('gameScreen');
+  document.body.classList.add('is-host');
+  document.getElementById('onlineBadge').textContent = '';
+  startSoloRound();
+};
 
-function confirmGuess2() {
-  if (!player2Guess) return;
-  p2GuessConfirmed = true;
-  document.getElementById('confirmGuessBtn2').disabled = true;
-  checkBothGuessed();
-}
+function startSoloRound() {
+  soloRound++;
+  soloPhase = 'playing';
+  soloLoser = null;
+  soloP1Guess = null;
+  soloP2Guess = null;
+  soloP1Confirmed = false;
+  soloP2Confirmed = false;
+  myGuess = null;
+  myGuessConfirmed = false;
 
-function checkBothGuessed() {
-  if (!p1GuessConfirmed || !p2GuessConfirmed) return;
-  showRoundResult();
-}
-
-function showRoundResult() {
+  document.getElementById('roundResult').classList.remove('show');
   document.getElementById('guessSection').style.display = 'none';
+  document.getElementById('roundBadge').textContent = `סיבוב ${soloRound}`;
+  document.getElementById('roundInfo').textContent = `נותרו ${soloRemaining.length} פוליטיקאים, ${soloRemaining.length - 1} כיסאות`;
 
-  // Highlight loser
-  renderPoliticians(false);
-  const loserCard = document.querySelector(`.pol-card[data-id="${loser.id}"]`);
-  if (loserCard) {
-    loserCard.style.outline = '3px solid red';
-    loserCard.style.borderRadius = '50%';
-  }
+  renderSoloScores();
+  renderChairs(soloRemaining);
+  renderPoliticians(soloRemaining, soloEliminated, false);
 
-  // Score
-  const p1Correct = playerGuess && playerGuess.id === loser.id;
-  const p2Correct = player2Guess && player2Guess.id === loser.id;
-  if (p1Correct) players[0].score++;
-  if (p2Correct) players[1].score++;
-
-  // Result UI
-  const p2 = players[1];
-  let resultHTML = '';
-  if (p1Correct && p2Correct) resultHTML = `שניכם צדקתם! 🎯 +1 לכל אחד`;
-  else if (p1Correct) resultHTML = `${players[0].name} צדק! 🎯 +1`;
-  else if (p2Correct) resultHTML = `${p2.name} צדק! 🎯 +1`;
-  else resultHTML = `אף אחד לא צדק 😅`;
-
-  document.getElementById('resultIcon').textContent = (p1Correct || p2Correct) ? '✅' : '🔄';
-  document.getElementById('resultText').textContent = resultHTML;
-  document.getElementById('resultWho').textContent = `${loser.name} נשאר בלי כסא!`;
-  document.getElementById('roundResult').classList.add('show');
-  // Make sure next button is visible (unless game over)
-  const nextBtn = document.querySelector('.next-round-btn');
-
-  if (!p1Correct && !p2Correct) {
-    // Nobody guessed right — replay, don't eliminate
-    if (nextBtn) { nextBtn.style.display = 'inline-block'; nextBtn.textContent = '🔄 סיבוב חוזר!'; }
-    renderScores();
-    return; // don't eliminate
-  }
-
-  if (nextBtn) { nextBtn.style.display = 'inline-block'; nextBtn.textContent = 'סיבוב הבא ▶'; }
-
-  renderScores();
-
-  // Eliminate loser
-  eliminated.push(loser);
-  remaining = remaining.filter(p => p.id !== loser.id);
-
-  // Check if game over
-  if (remaining.length === 1) {
-    setTimeout(showWinner, 2500);
-    if (nextBtn) nextBtn.style.display = 'none';
+  if (audioUnlocked) {
+    userStartMusicSolo();
+  } else {
+    document.getElementById('playMusicBtn').style.display = 'block';
+    document.getElementById('statusMsg').textContent = 'לחץ על הכפתור להפעלת המוזיקה 🎵';
   }
 }
 
-function nextRound() {
-  startRound();
-}
-
-function renderScores() {
-  const bar = document.getElementById('scoresBar');
-  bar.innerHTML = players.map(p => `
+function renderSoloScores() {
+  document.getElementById('scoresBar').innerHTML = soloPlayers.map(p => `
     <div class="score-card">
       <div class="name">${p.name}</div>
       <div class="pts">${p.score}</div>
@@ -805,7 +896,203 @@ function renderScores() {
   `).join('');
 }
 
-function renderChairs() {
+function startSoloMusicTimer() {
+  soloLoser = soloRemaining[Math.floor(Math.random() * soloRemaining.length)];
+  const duration = 3000 + Math.random() * 3000;
+  let musicTime = 0;
+  const tick = 100;
+  clearInterval(musicInterval);
+  musicInterval = setInterval(() => {
+    musicTime += tick;
+    const pct = Math.max(0, 100 - (musicTime / duration * 100));
+    document.getElementById('musicFill').style.width = pct + '%';
+    if (musicTime >= duration) {
+      clearInterval(musicInterval);
+      pauseAudio();
+      document.getElementById('trumpImg').classList.remove('playing');
+      document.querySelectorAll('.pol-card').forEach(c => c.classList.remove('moving'));
+      document.getElementById('musicFill').style.width = '0%';
+      document.getElementById('statusMsg').textContent = 'המוזיקה עצרה! מי נשאר בלי כסא?';
+      soloPhase = 'guessing';
+      showSoloGuessSection();
+      // AI guesses
+      setTimeout(() => {
+        soloP2Guess = soloRemaining[Math.floor(Math.random() * soloRemaining.length)];
+        soloP2Confirmed = true;
+        checkSoloBothGuessed();
+      }, 500 + Math.random() * 1500);
+    }
+  }, tick);
+}
+
+function userStartMusicSolo() {
+  document.getElementById('playMusicBtn').style.display = 'none';
+  audioUnlocked = true;
+  playMusic();
+  document.getElementById('trumpImg').classList.add('playing');
+  document.querySelectorAll('.pol-card').forEach(c => c.classList.add('moving'));
+  document.getElementById('statusMsg').textContent = 'טראמפ מנגן! הפוליטיקאים זזים...';
+  startSoloMusicTimer();
+}
+
+// Override userStartMusic for solo
+window.userStartMusic = function() {
+  if (isSolo) { userStartMusicSolo(); return; }
+  // Online host music (defined above — no-op placeholder, real one is defined later)
+};
+
+function showSoloGuessSection() {
+  const gs = document.getElementById('guessSection');
+  gs.style.display = 'block';
+  buildGuessGridSolo('guessGrid', soloRemaining);
+  document.getElementById('confirmGuessBtn').style.display = 'block';
+  document.getElementById('confirmGuessBtn').disabled = true;
+  document.getElementById('waitingForOther').style.display = 'none';
+}
+
+function buildGuessGridSolo(containerId, remaining) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  remaining.forEach(pol => {
+    const btn = document.createElement('button');
+    btn.className = 'guess-btn';
+    btn.dataset.id = pol.id;
+    btn.innerHTML = `<img src="${imgUrl(pol.id)}" onerror="this.style.display='none'"><span>${pol.name}</span>`;
+    btn.onclick = () => {
+      soloP1Guess = pol;
+      document.querySelectorAll('#guessGrid .guess-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('confirmGuessBtn').disabled = false;
+    };
+    grid.appendChild(btn);
+  });
+}
+
+window.confirmGuess = function() {
+  if (isSolo) {
+    if (!soloP1Guess) return;
+    soloP1Confirmed = true;
+    document.getElementById('confirmGuessBtn').disabled = true;
+    document.getElementById('statusMsg').textContent = `${soloPlayers[0].name} ניחש: ${soloP1Guess.name}`;
+    checkSoloBothGuessed();
+    return;
+  }
+  // Online
+  if (!myGuess) return;
+  myGuessConfirmed = true;
+  document.getElementById('confirmGuessBtn').disabled = true;
+  document.getElementById('waitingForOther').style.display = 'block';
+  document.getElementById('guessGrid').innerHTML = '';
+  document.getElementById('confirmGuessBtn').style.display = 'none';
+  const field = myRole === 'host' ? 'hostGuess' : 'guestGuess';
+  const confirmed = myRole === 'host' ? 'hostConfirmed' : 'guestConfirmed';
+  update(ref(db, `chairs_rooms/${roomCode}`), { [field]: myGuess, [confirmed]: true });
+};
+
+function checkSoloBothGuessed() {
+  if (!soloP1Confirmed || !soloP2Confirmed) return;
+  showSoloRoundResult();
+}
+
+function showSoloRoundResult() {
+  document.getElementById('guessSection').style.display = 'none';
+  renderPoliticians(soloRemaining, soloEliminated, false);
+
+  const p1Correct = soloP1Guess && soloP1Guess.id === soloLoser.id;
+  const p2Correct = soloP2Guess && soloP2Guess.id === soloLoser.id;
+  if (p1Correct) soloPlayers[0].score++;
+  if (p2Correct) soloPlayers[1].score++;
+
+  let resultHTML = '';
+  if (p1Correct && p2Correct) resultHTML = 'שניכם צדקתם! 🎯 +1 לכל אחד';
+  else if (p1Correct) resultHTML = `${soloPlayers[0].name} צדק! 🎯 +1`;
+  else if (p2Correct) resultHTML = `${soloPlayers[1].name} צדק! 🎯 +1`;
+  else resultHTML = 'אף אחד לא צדק 😅';
+
+  document.getElementById('resultIcon').textContent = (p1Correct || p2Correct) ? '✅' : '🔄';
+  document.getElementById('resultText').textContent = resultHTML;
+  document.getElementById('resultWho').textContent = `${soloLoser.name} נשאר בלי כסא!`;
+  document.getElementById('roundResult').classList.add('show');
+
+  const nextBtn = document.getElementById('nextRoundBtn');
+  nextBtn.style.display = 'inline-block';
+
+  const anyCorrect = p1Correct || p2Correct;
+  if (anyCorrect) {
+    soloEliminated.push(soloLoser);
+    soloRemaining = soloRemaining.filter(p => p.id !== soloLoser.id);
+    nextBtn.textContent = 'סיבוב הבא ▶';
+  } else {
+    nextBtn.textContent = '🔄 סיבוב חוזר!';
+  }
+
+  renderSoloScores();
+
+  if (soloRemaining.length === 1) {
+    setTimeout(showSoloWinner, 2500);
+    nextBtn.style.display = 'none';
+  }
+}
+
+window.hostNextRound = function() {
+  if (isSolo) { startSoloRound(); return; }
+  // Online host next round (defined above)
+  if (myRole !== 'host') return;
+  const s = gameState;
+  myGuess = null;
+  myGuessConfirmed = false;
+  update(ref(db, `chairs_rooms/${roomCode}`), {
+    round: (s.round || 0) + 1,
+    phase: 'playing',
+    loser: null,
+    hostGuess: null,
+    guestGuess: null,
+    hostConfirmed: false,
+    guestConfirmed: false,
+    musicStop: null,
+    resultHostCorrect: false,
+    resultGuestCorrect: false,
+    resultAnyCorrect: false,
+  });
+  audioUnlocked = false;
+  document.getElementById('roundResult').classList.remove('show');
+  document.getElementById('playMusicBtn').style.display = 'block';
+};
+
+function showSoloWinner() {
+  const winner = soloRemaining[0];
+  playWinMusic();
+  showScreen('winnerScreen');
+  document.getElementById('winnerImg').src = imgUrl(winner.id);
+  document.getElementById('winnerName').textContent = winner.name;
+  const sorted = [...soloPlayers].sort((a,b) => b.score - a.score);
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('finalScores').innerHTML = `
+    <h3 style="color:var(--gold);margin-bottom:12px">תוצאות המשחק</h3>
+    ${sorted.map((p,i) => `
+      <div class="final-score-row">
+        <span>${medals[i]||''} ${p.name}</span>
+        <span style="color:var(--gold);font-weight:700">${p.score} נקודות</span>
+      </div>
+    `).join('')}
+  `;
+  launchConfetti();
+}
+
+window.playAgain = function() {
+  clearInterval(musicInterval);
+  stopAudio();
+  isSolo = false;
+  document.body.classList.remove('is-host');
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (roomCode) { remove(ref(db, `chairs_rooms/${roomCode}`)); roomCode = null; }
+  myRole = null;
+  history.replaceState({}, '', location.pathname);
+  showScreen('lobbyScreen');
+};
+
+// ── RENDER HELPERS ──
+function renderChairs(remaining) {
   const chairs = remaining.length - 1;
   const row = document.getElementById('chairsRow');
   row.innerHTML = '';
@@ -817,7 +1104,7 @@ function renderChairs() {
   }
 }
 
-function renderPoliticians(moving) {
+function renderPoliticians(remaining, eliminated, moving) {
   const grid = document.getElementById('polGrid');
   grid.innerHTML = '';
   [...remaining, ...eliminated].forEach(pol => {
@@ -830,68 +1117,11 @@ function renderPoliticians(moving) {
   });
 }
 
-function showWinner() {
-  const winner = remaining[0];
-  playWinMusic();
-  showScreen('winnerScreen');
-  document.getElementById('winnerImg').src = imgUrl(winner.id);
-  document.getElementById('winnerName').textContent = winner.name;
-
-  // Final scores
-  const sorted = [...players].sort((a, b) => b.score - a.score);
-  const medals = ['🥇', '🥈', '🥉'];
-  document.getElementById('finalScores').innerHTML = `
-    <h3 style="color:var(--gold);margin-bottom:12px">תוצאות המשחק</h3>
-    ${sorted.map((p, i) => `
-      <div class="final-score-row">
-        <span>${medals[i] || '  '} ${p.name}</span>
-        <span style="color:var(--gold);font-weight:700">${p.score} נקודות</span>
-      </div>
-    `).join('')}
-  `;
-
-  launchConfetti();
-}
-
-function playAgain() {
-  stopAudio();
-  clearConfetti();
-  audioUnlocked = false;
-  showScreen('setupScreen');
-}
-
-// ===== AUDIO =====
-const AUDIO_BASE = 'https://yaronzlot.github.io/primeminister/audio/';
-const audio = new Audio(AUDIO_BASE + 'BetteDavisEyes.mp3');
-audio.loop = true;
-audio.volume = 0.6;
-
-function playMusic() {
-  audio.play().catch(e => console.log('audio error:', e));
-}
-
-function pauseAudio() {
-  audio.pause();
-}
-
-function stopAudio() {
-  audio.pause();
-  audio.currentTime = 0;
-}
-
-function playWinMusic() {
-  audio.pause();
-  audio.currentTime = 0;
-  audio.loop = false;
-  audio.volume = 0.8;
-  audio.play().catch(e => {});
-}
-
-// ===== CONFETTI =====
+// ── CONFETTI ──
 function launchConfetti() {
   const c = document.getElementById('confetti');
   c.innerHTML = '';
-  const colors = ['#FFD700', '#FF0000', '#0000FF', '#00CC00', '#FF69B4', '#FFA500'];
+  const colors = ['#FFD700','#FF0000','#0000FF','#00CC00','#FF69B4','#FFA500'];
   for (let i = 0; i < 80; i++) {
     const p = document.createElement('div');
     p.className = 'confetti-piece';
@@ -906,9 +1136,8 @@ function launchConfetti() {
   }
 }
 
-function clearConfetti() {
-  document.getElementById('confetti').innerHTML = '';
-}
+// Init: show lobby
+showScreen('lobbyScreen');
 </script>
 </body>
 </html>
