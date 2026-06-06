@@ -484,6 +484,7 @@
 
   <div class="trump-stage">
     <img id="trumpImg" src="https://raw.githubusercontent.com/yaronzlot/primeminister/main/images/Trump.jpg" alt="Trump">
+    <div id="playMusicBtn" onclick="userStartMusic()" style="display:none;margin:8px auto;background:var(--gold);color:#000;font-family:'Secular One',sans-serif;font-size:1rem;padding:10px 24px;border-radius:20px;cursor:pointer;width:fit-content;box-shadow:0 0 20px rgba(255,215,0,0.5)">🎵 הפעל מוזיקה</div>
     <div class="status-msg" id="statusMsg">טראמפ מנגן! הפוליטיקאים זזים...</div>
   </div>
 
@@ -591,6 +592,29 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
+function userStartMusic() {
+  document.getElementById('playMusicBtn').style.display = 'none';
+  playMusic();
+  document.getElementById('trumpImg').classList.add('playing');
+  document.querySelectorAll('.pol-card').forEach(c => c.classList.add('moving'));
+  document.getElementById('statusMsg').textContent = 'טראמפ מנגן! הפוליטיקאים זזים...';
+
+  // Start countdown timer
+  musicDuration = 3000 + Math.random() * 3000;
+  musicTime = 0;
+  const tick = 100;
+  clearInterval(musicInterval);
+  musicInterval = setInterval(() => {
+    musicTime += tick;
+    const pct = Math.max(0, 100 - (musicTime / musicDuration * 100));
+    document.getElementById('musicFill').style.width = pct + '%';
+    if (musicTime >= musicDuration) {
+      clearInterval(musicInterval);
+      stopMusic();
+    }
+  }, tick);
+}
+
 function startRound() {
   round++;
   phase = 'playing';
@@ -609,28 +633,12 @@ function startRound() {
 
   renderScores();
   renderChairs();
-  renderPoliticians(true);
-  playMusic();
+  renderPoliticians(false);
 
-  // Random duration 3-6 seconds
-  musicDuration = 3000 + Math.random() * 3000;
-  musicTime = 0;
-
-  const tick = 100;
-  clearInterval(musicInterval);
-  musicInterval = setInterval(() => {
-    musicTime += tick;
-    const pct = Math.max(0, 100 - (musicTime / musicDuration * 100));
-    document.getElementById('musicFill').style.width = pct + '%';
-    if (musicTime >= musicDuration) {
-      clearInterval(musicInterval);
-      stopMusic();
-    }
-  }, tick);
-
-  document.getElementById('statusMsg').textContent = 'טראמפ מנגן! הפוליטיקאים זזים...';
-  document.getElementById('trumpImg').classList.add('playing');
-  document.querySelectorAll('.pol-card').forEach(c => c.classList.add('moving'));
+  // Show play button — music requires user interaction on mobile
+  document.getElementById('playMusicBtn').style.display = 'block';
+  document.getElementById('statusMsg').textContent = 'לחץ על הכפתור להפעלת המוזיקה 🎵';
+  document.getElementById('trumpImg').classList.remove('playing');
 }
 
 function stopMusic() {
