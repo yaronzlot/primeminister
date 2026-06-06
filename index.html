@@ -755,10 +755,21 @@ function showRoundResult() {
   else if (p2Correct) resultHTML = `${p2.name} צדק! 🎯 +1`;
   else resultHTML = `אף אחד לא צדק 😅`;
 
-  document.getElementById('resultIcon').textContent = (p1Correct || p2Correct) ? '✅' : '❌';
+  document.getElementById('resultIcon').textContent = (p1Correct || p2Correct) ? '✅' : '🔄';
   document.getElementById('resultText').textContent = resultHTML;
   document.getElementById('resultWho').textContent = `${loser.name} נשאר בלי כסא!`;
   document.getElementById('roundResult').classList.add('show');
+  // Make sure next button is visible (unless game over)
+  const nextBtn = document.querySelector('.next-round-btn');
+
+  if (!p1Correct && !p2Correct) {
+    // Nobody guessed right — replay, don't eliminate
+    if (nextBtn) { nextBtn.style.display = 'inline-block'; nextBtn.textContent = '🔄 סיבוב חוזר!'; }
+    renderScores();
+    return; // don't eliminate
+  }
+
+  if (nextBtn) { nextBtn.style.display = 'inline-block'; nextBtn.textContent = 'סיבוב הבא ▶'; }
 
   renderScores();
 
@@ -768,8 +779,7 @@ function showRoundResult() {
 
   // Check if game over
   if (remaining.length === 1) {
-    setTimeout(showWinner, 2000);
-    const nextBtn = document.querySelector('.next-round-btn');
+    setTimeout(showWinner, 2500);
     if (nextBtn) nextBtn.style.display = 'none';
   }
 }
@@ -892,27 +902,30 @@ function playMelody(notes, bpm, loop, volume) {
   scheduleNotes();
 }
 
-// Hail to the Chief — simplified melody (first phrase)
+// עם ישראל חי — המנגינה הראשית
 const HAIL_NOTES = [
-  [262,0.5],[294,0.5],[330,1],[262,0.5],[294,0.5],[330,1],
-  [392,1],[349,0.5],[330,0.5],[294,2],
-  [262,0.5],[294,0.5],[330,1],[392,1],
-  [440,0.5],[392,0.5],[349,0.5],[330,0.5],[294,2],
-  [392,0.5],[440,0.5],[494,1],[392,0.5],[440,0.5],[494,1],
-  [523,1],[494,0.5],[440,0.5],[392,2],
+  [330,1],[330,0.5],[330,0.5],[392,1],[392,1],
+  [440,1],[440,0.5],[440,0.5],[392,2],
+  [392,1],[349,0.5],[349,0.5],[330,1],[330,1],
+  [294,1],[294,0.5],[294,0.5],[262,2],
+  [330,1],[330,0.5],[330,0.5],[392,1],[392,1],
+  [440,1],[494,0.5],[523,0.5],[494,2],
+  [392,1],[349,0.5],[330,0.5],[294,1],[262,1],
+  [262,3],[0,1],
 ];
 
-// We Are the Champions — simplified melody
+// הבה נגילה — לניצחון
 const CHAMPIONS_NOTES = [
-  [392,1],[392,0.5],[392,0.5],[440,1],[392,1],[0,0.5],[349,0.5],[330,2],
-  [330,1],[330,0.5],[330,0.5],[392,1],[330,1],[0,0.5],[294,0.5],[262,2],
-  [262,1],[294,1],[330,1],[349,1],[392,2],[0,1],
-  [523,1],[494,1],[440,1],[392,2],[0,1],
-  [523,1],[523,0.5],[523,0.5],[587,1],[523,1],[0,0.5],[494,0.5],[440,3],
+  [220,1],[233,1],[247,1],[262,2],[0,0.5],
+  [262,1],[262,1],[262,1],[262,2],[0,0.5],
+  [294,1],[294,1],[294,1],[294,2],[0,0.5],
+  [330,1],[330,0.5],[330,0.5],[330,2],[0,0.5],
+  [330,0.5],[349,0.5],[330,0.5],[294,0.5],[262,1],[247,1],[233,1],[220,2],[0,1],
+  [262,1],[262,0.5],[262,0.5],[294,0.5],[262,0.5],[247,1],[233,1],[220,2],[0,1],
 ];
 
 function playMusic() {
-  playMelody(HAIL_NOTES, 100, true, 0.3);
+  playMelody(HAIL_NOTES, 130, true, 0.3);
 }
 
 function pauseAudio() {
@@ -924,7 +937,7 @@ function stopAudio() {
 }
 
 function playWinMusic() {
-  playMelody(CHAMPIONS_NOTES, 92, false, 0.35);
+  playMelody(CHAMPIONS_NOTES, 140, false, 0.35);
 }
 
 // ===== CONFETTI =====
